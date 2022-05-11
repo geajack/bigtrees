@@ -1,0 +1,1 @@
+Plain maximin goes through 8388607 steps while solving the linear tree.
