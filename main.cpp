@@ -1,181 +1,51 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 #include <math.h>
+#include <stdlib.h>
 
-class BinaryTreePath
-{
-public:
-    int length;
-    long seed;
+const int WINDOW_WIDTH  = 1000;
+const int WINDOW_HEIGHT = 1000;
 
-    BinaryTreePath(int depth)
-    {
-        length = 0;
-        seed = 0;
-    }    
-
-    void left()
-    {
-        seed = seed & ~(1UL << length++);
-    }
-
-    void right()
-    {
-        seed = seed | (1UL << length++);
-    }
-
-    void back()
-    {
-        length--;
-    }
-
-    void reset()
-    {
-        seed = 0;
-        length = 0;
-    }
-};
-
-class BinaryTree
-{
-    int depth;
-public:
-    BinaryTree(int depth)
-    {
-        this->depth = depth;
-    }
-
-    int score(BinaryTreePath *path)
-    {
-        if (path->length == depth)
-        {
-            return path->seed;
-        }
-        else
-        {
-            return -1;
-        }
-    }
-};
-
-int maximin(BinaryTree *tree, BinaryTreePath *path);
-int minimax(BinaryTree *tree, BinaryTreePath *path);
-int maximin_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upper);
-int minimax_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upper);
-
-int maximin(BinaryTree *tree, BinaryTreePath *path)
-{
-    int score = tree->score(path);
-
-    if (score == -1)
-    {
-        path->left();
-        int left_score = minimax(tree, path);
-        path->back();
-
-        path->right();
-        int right_score = minimax(tree, path);
-        path->back();
-
-        return std::max(left_score, right_score);
-    }
-    else
-    {
-        return score;
-    }
-}
-
-int minimax(BinaryTree *tree, BinaryTreePath *path)
-{
-    int score = tree->score(path);
-
-    if (score == -1)
-    {
-        path->left();
-        int left_score = maximin(tree, path);
-        path->back();
-
-        path->right();
-        int right_score = maximin(tree, path);
-        path->back();
-
-        return std::min(left_score, right_score);
-    }
-    else
-    {
-        return score;
-    }
-}
-
-int maximin_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upper)
-{
-    int score = tree->score(path);
-
-    if (score == -1)
-    {
-        path->left();
-        int left_score = minimax_alphabeta(tree, path, lower, upper);
-        path->back();
-
-        if (upper != -1 && left_score >= upper) return upper;
-
-        lower = left_score;
-
-        path->right();
-        int right_score = minimax_alphabeta(tree, path, lower, upper);
-        path->back();
-
-        return std::max(left_score, right_score);
-    }
-    else
-    {
-        return score;
-    }
-}
-
-int minimax_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upper)
-{
-    int score = tree->score(path);
-
-    if (score == -1)
-    {
-        path->left();
-        int left_score = maximin_alphabeta(tree, path, lower, upper);
-        path->back();
-
-        if (lower != -1 && left_score <= lower) return lower;
-
-        upper = left_score;
-
-        path->right();
-        int right_score = maximin_alphabeta(tree, path, lower, upper);
-        path->back();
-
-        return std::min(left_score, right_score);
-    }
-    else
-    {
-        return score;
-    }
-}
+typedef Uint32 (*PixelBuffer)[WINDOW_HEIGHT];
 
 int main()
 {
-    const int DEPTH = 22;
-    int score;
+    SDL_Init(SDL_INIT_EVERYTHING);
+    
+    SDL_Window *window = SDL_CreateWindow("New SDL Project", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
 
-    BinaryTree tree(DEPTH);
-    BinaryTreePath path(DEPTH);
+    SDL_Surface *window_surface = SDL_GetWindowSurface(window);
+    PixelBuffer pixels = (PixelBuffer) window_surface->pixels;
 
-    time_t start_time = clock();
-    score = maximin(&tree, &path);
-    printf("Score: %b (%ldus)\n", score, clock() - start_time);
+    Uint32 white = SDL_MapRGBA(window_surface->format, 255, 255, 255, 255);
 
-    path.reset();
-    start_time = clock();
-    score = maximin_alphabeta(&tree, &path, -1, -1);
-    printf("Score: %b (%ldus)\n", score, clock() - start_time);
+    SDL_Event event;
+    bool quit = false;
+    while (!quit)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+                case SDL_QUIT:
+                quit = 1;
+                break;
+            }
+        }
+
+        int y = 200;
+        for (int x = 300 - 128; x <= 300 + 128; x++)
+        {
+            pixels[y][x] = white;
+        }
+
+        SDL_UpdateWindowSurface(window);
+        
+        SDL_Delay(1000 / 60);
+    }
+
+    SDL_Quit();
 
     return 0;
 }
