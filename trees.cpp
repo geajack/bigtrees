@@ -61,54 +61,60 @@ public:
     }
 };
 
-int maximin(BinaryTree *tree, BinaryTreePath *path);
-int minimax(BinaryTree *tree, BinaryTreePath *path);
 int maximin_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upper);
 int minimax_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upper);
 
-int maximin(BinaryTree *tree, BinaryTreePath *path)
+struct MaximinState
 {
-    int score = tree->score(path);
+    long path;
+    int depth;
+};
 
-    if (score == -1)
-    {
-        path->left();
-        int left_score = minimax(tree, path);
-        path->back();
-
-        path->right();
-        int right_score = minimax(tree, path);
-        path->back();
-
-        return max(left_score, right_score);
-    }
-    else
-    {
-        return score;
-    }
-}
-
-int minimax(BinaryTree *tree, BinaryTreePath *path)
+class MaximinSolver
 {
-    int score = tree->score(path);
-
-    if (score == -1)
+    int maximin(BinaryTree *tree, BinaryTreePath *path, int sign)
     {
-        path->left();
-        int left_score = maximin(tree, path);
-        path->back();
+        history[t].path = path->seed;
+        history[t].depth = path->length;
+        t++;
 
-        path->right();
-        int right_score = maximin(tree, path);
-        path->back();
+        int score = tree->score(path);
 
-        return min(left_score, right_score);
+        if (score == -1)
+        {
+            path->left();
+            int left_score = sign * maximin(tree, path, -sign);
+            path->back();
+
+            path->right();
+            int right_score = sign * maximin(tree, path, -sign);
+            path->back();
+
+            return sign * max(left_score, right_score);
+        }
+        else
+        {
+            return sign * score;
+        }    
     }
-    else
+
+public:
+    MaximinState *history;
+    unsigned long t;
+
+    MaximinSolver(int depth)
     {
-        return score;
+        int n_nodes = (1 << depth);
+        int max_steps = n_nodes * 3;
+        history = new MaximinState[max_steps];
+        t = 0;
     }
-}
+
+    int solve(BinaryTree *tree, BinaryTreePath *path)
+    {
+        return maximin(tree, path, 1);
+    }
+};
 
 int maximin_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upper)
 {
@@ -162,22 +168,24 @@ int minimax_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upp
     }
 }
 
-int main()
-{
-    const int DEPTH = 18;
-    int score;
+// int main()
+// {
+//     const int DEPTH = 18;
+//     int score;
 
-    BinaryTree tree(DEPTH);
-    BinaryTreePath path(DEPTH);
+//     BinaryTree tree(DEPTH);
+//     BinaryTreePath path(DEPTH);
 
-    time_t start_time = clock();
-    score = maximin(&tree, &path);
-    printf("Score: %o (%ldus)\n", score, clock() - start_time);
+//     MaximinSolver solver(DEPTH);
 
-    path.reset();
-    start_time = clock();
-    score = maximin_alphabeta(&tree, &path, -1, -1);
-    printf("Score: %o (%ldus)\n", score, clock() - start_time);
+//     time_t start_time = clock();
+//     score = solver.solve(&tree, &path);
+//     printf("Score: %o (%ldus)\n", score, clock() - start_time);
 
-    return 0;
-}
+//     path.reset();
+//     start_time = clock();
+//     score = maximin_alphabeta(&tree, &path, -1, -1);
+//     printf("Score: %o (%ldus)\n", score, clock() - start_time);
+
+//     return 0;
+// }
