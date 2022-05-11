@@ -28,6 +28,11 @@ public:
     {
         length--;
     }
+
+    void reset()
+    {
+        length = 0;
+    }
 };
 
 class BinaryTree
@@ -77,12 +82,16 @@ int maximin(BinaryTree *tree, BinaryTreePath *path)
 int main()
 {
     const int DEPTH = 20;
+    int score;
 
     BinaryTree tree(DEPTH);
     BinaryTreePath path(DEPTH);
 
-    int score = maximin(&tree, &path);
+    score = maximin(&tree, &path);
+    printf("Score: %d\n", score);
 
+    path.reset();
+    score = maximin(&tree, &path);
     printf("Score: %d\n", score);
 
     return 0;
