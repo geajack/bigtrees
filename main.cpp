@@ -4,24 +4,24 @@
 
 class BinaryTreePath
 {
-    char *path;
 public:
     int length;
+    long seed;
 
     BinaryTreePath(int depth)
     {
-        path = new char[depth];
         length = 0;
+        seed = 0;
     }    
 
     void left()
     {
-        path[length++] = 0;
+        seed = seed & (0 << length++);
     }
 
     void right()
     {
-        path[length++] = 1;
+        seed = seed | (1 << length++);
     }
 
     void back()
@@ -31,6 +31,7 @@ public:
 
     void reset()
     {
+        seed = 0;
         length = 0;
     }
 };
@@ -48,6 +49,7 @@ public:
     {
         if (path->length == depth)
         {
+            srand(path->seed);
             return rand();
         }
         else
