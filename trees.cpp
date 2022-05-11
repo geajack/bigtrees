@@ -1,7 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <time.h>
-#include <math.h>
+
+#define max(x, y) (x >= y ? x : y)
+#define min(x, y) (x <= y ? x : y)
 
 class BinaryTreePath
 {
@@ -78,7 +80,7 @@ int maximin(BinaryTree *tree, BinaryTreePath *path)
         int right_score = minimax(tree, path);
         path->back();
 
-        return std::max(left_score, right_score);
+        return max(left_score, right_score);
     }
     else
     {
@@ -100,7 +102,7 @@ int minimax(BinaryTree *tree, BinaryTreePath *path)
         int right_score = maximin(tree, path);
         path->back();
 
-        return std::min(left_score, right_score);
+        return min(left_score, right_score);
     }
     else
     {
@@ -126,7 +128,7 @@ int maximin_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upp
         int right_score = minimax_alphabeta(tree, path, lower, upper);
         path->back();
 
-        return std::max(left_score, right_score);
+        return max(left_score, right_score);
     }
     else
     {
@@ -152,7 +154,7 @@ int minimax_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upp
         int right_score = maximin_alphabeta(tree, path, lower, upper);
         path->back();
 
-        return std::min(left_score, right_score);
+        return min(left_score, right_score);
     }
     else
     {
@@ -162,7 +164,7 @@ int minimax_alphabeta(BinaryTree *tree, BinaryTreePath *path, int lower, int upp
 
 int main()
 {
-    const int DEPTH = 22;
+    const int DEPTH = 18;
     int score;
 
     BinaryTree tree(DEPTH);
@@ -170,12 +172,12 @@ int main()
 
     time_t start_time = clock();
     score = maximin(&tree, &path);
-    printf("Score: %b (%ldus)\n", score, clock() - start_time);
+    printf("Score: %o (%ldus)\n", score, clock() - start_time);
 
     path.reset();
     start_time = clock();
     score = maximin_alphabeta(&tree, &path, -1, -1);
-    printf("Score: %b (%ldus)\n", score, clock() - start_time);
+    printf("Score: %o (%ldus)\n", score, clock() - start_time);
 
     return 0;
 }
